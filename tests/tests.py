@@ -22,3 +22,17 @@ class CommentModel(TestCase):
             content_object=movie,
         )
         self.assertEqual(comment.timestamp.date(), datetime.date.today())
+
+    def test_delete_comment(self):
+        book = Book.objects.create()
+        comment = Comment.objects.create(content_object=book, comment='Delete me!')
+        comment.delete()
+        self.assertEquals(Book.objects.count(), 1)
+        self.assertEquals(Comment.objects.count(), 0)
+
+        # The following depends on a GenericRelation in the Book model
+        comment = Comment.objects.create(content_object=book, comment='I will go, when you go.')
+        book.delete()
+        self.assertEquals(Book.objects.count(), 0)
+        self.assertEquals(Comment.objects.count(), 0)
+
