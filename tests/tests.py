@@ -143,3 +143,23 @@ class TemplateTags(TestCase):
         self.assertIn('<form action="{}" method="POST">'.format(post_url), out)
         self.assertIn('</form>', out)      
         self.assertNotIn('form', context)  
+
+    def test_get_comments_for_object(self):
+        book = Book.objects.create()
+        Comment.objects.create(comment='First', content_object=book)
+        Comment.objects.create(comment='Second', content_object=book)
+        template = Template('{% load troll %}{% get_comments_for_object object as comments %}')
+        context = Context({'object': book})
+        out = template.render(context)
+        qs = context['comments']
+        self.assertEqual(qs.count(), 2)
+
+    def test_render_comments_for_object(self):
+        book = Book.objects.create()
+        c1 = Comment.objects.create(comment='First', content_object=book)
+        Comment.objects.create(comment='Second', content_object=book)
+        template = Template('{% load troll %}{% render_comments_for_object object %}')
+        context = Context({'object': book})
+        out = template.render(context)
+        self.assertIn('<span class="timestamp">', out)
+        self.assertIn('First', out)
