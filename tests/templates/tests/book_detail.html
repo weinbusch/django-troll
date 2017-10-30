@@ -1,0 +1,8 @@
+{% load troll %}
+<h1>{{ object }}</h1>
+
+<h2>Add a comment</h2>
+{% render_comment_form_for_object object %}
+
+<h2>Comments</h2>
+{% render_comments_for_object object %}

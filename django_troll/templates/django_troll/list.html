@@ -1,7 +1,7 @@
 <ul class="comment-list">
     {% for object in object_list %}
     <li>
-        <span class="timestamp">{{ object.timestamp }}</span> {{ object.comment }}
+        <span class="timestamp">{{ object.timestamp }}</span> {{ object.comment|linebreaks }}
     </li>
     {% endfor %}
 </ul>
