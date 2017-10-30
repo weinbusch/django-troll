@@ -1,0 +1,17 @@
+{% load i18n %}
+
+<form action="{% url 'comment_add' %}" method="POST">
+    {% csrf_token %}
+    {% for field in form.hidden_fields %}
+        {{ field }}
+    {% endfor %}
+    {% for field in form.visible_fields %}
+        <div>
+            {{ field.label_tag }}
+            {{ field }}
+        </div>    
+    {% endfor %}
+    <div>
+        <input type="submit" value="{% trans 'Save' %}">
+    </div>
+</form>
