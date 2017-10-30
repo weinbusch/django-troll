@@ -63,8 +63,9 @@ class Forms(TestCase):
             'content_type': ct.pk,
         }
         form = CommentForm(data=data)
-        form.is_valid()
+        self.assertTrue(form.is_valid())
         comment = form.save()
+        self.assertEqual(Comment.objects.count(), 1)
         self.assertEqual(comment.content_object, book)
 
     def test_errors(self):
@@ -76,7 +77,7 @@ class Forms(TestCase):
             'content_type': ct.pk,
         }
         form = CommentForm(data=data)
-        form.is_valid()
+        self.assertFalse(form.is_valid())
         self.assertIn('comment', form.errors)
 
     def test_hidden_and_visible_fields(self):
@@ -85,12 +86,13 @@ class Forms(TestCase):
         self.assertIn('content_type', [bf.name for bf in form.hidden_fields()])
         self.assertIn('object_id', [bf.name for bf in form.hidden_fields()])
 
+    def test_required_fields(self):
+        form = CommentForm()
+        self.assertTrue(form.fields['comment'].required)
+        self.assertTrue(form.fields['object_id'].required)
+        self.assertTrue(form.fields['content_type'].required)
+                
 class Views(TestCase):
-
-    def test_book_absolute_url(self):
-        book = Book.objects.create()
-        response = self.client.get(book.get_absolute_url())
-        self.assertEqual(response.status_code, 200)
 
     def test_allowed_methods(self):
         response = self.client.get(reverse('comment_add'))
@@ -106,4 +108,16 @@ class Views(TestCase):
         }
         response = self.client.post(reverse('comment_add'), data=data)
         self.assertEquals(Comment.objects.count(), 1)
+        self.assertRedirects(response, book.get_absolute_url())
+
+    def test_post_invalid_comment(self):
+        book = Book.objects.create()
+        ct = ContentType.objects.get_for_model(book)
+        data = {
+            'comment': '',
+            'object_id': book.pk,
+            'content_type': ct.pk,
+        }
+        response = self.client.post(reverse('comment_add'), data=data)
+        self.assertEquals(Comment.objects.count(), 0)
         self.assertRedirects(response, book.get_absolute_url())
